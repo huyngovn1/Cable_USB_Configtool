@@ -1,0 +1,9 @@
+{
+  "additionalFiles": "..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..",
+  "compiler.optimization_flags": "-Os",
+  "customBuildProperties": "",
+  "fqbn": "esp32:esp32:esp32c3:CDCOnBoot=cdc",
+  "hardwareFolders": "C:\\Users\\huy\\AppData\\Local\\Arduino15\\packages",
+  "otherLibrariesFolders": "C:\\Users\\huy\\Documents\\Arduino\\libraries",
+  "sketchLocation": "C:\\Users\\huy\\Documents\\Codex\\2026-07-20\\referenced-chatgpt-conversation-this-is-untrusted\\VPTEK_ESC_USB_WEB_CARD_work\\VPTEK_ESC_USB_WEB_CARD\\VPTEK_ESC_USB_WEB_CARD"
+}

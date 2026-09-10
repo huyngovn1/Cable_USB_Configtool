@@ -1,0 +1,10 @@
+Simple full image:
+0x00000000  VPTEK_ESC_USB_WEB_CARD_MERGED.bin
+
+Separate images:
+0x00000000  bootloader.bin
+0x00008000  partitions.bin
+0x0000E000  boot_app0.bin
+0x00010000  VPTEK_ESC_USB_WEB_CARD_APP.bin
+
+Target: ESP32-C3, 4 MB flash.
