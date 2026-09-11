@@ -4,7 +4,8 @@
 #include "serial_comm.h"
 #include "MSP.h"
 #include "4Way.h"
-
+#include "system_mode.h"
+#include "web_bridge.h"
 uint16_t serial_rx_counter = 0;
 uint16_t serial_tx_counter = 0;
 uint16_t serial_buffer_len = 0;
@@ -14,7 +15,27 @@ bool serial_command = false;
 namespace {
 
 uint32_t lastSerialByteMs = 0;
+bool lockUsbMode()
+{
+    // Web đã được chọn -> chặn ConfigTool.
+    if (isWebMode()) {
+        return false;
+    }
 
+    // Lần đầu USB gửi frame hợp lệ.
+    if (isWaitMode()) {
+
+        if (!selectAppMode()) {
+            return false;
+        }
+
+        // QUAN TRỌNG:
+        // USB đã được chọn -> tắt Wi-Fi hoàn toàn.
+        stopWebRadio();
+    }
+
+    return isAppMode();
+}
 void resetSerialParser()
 {
     serial_command = false;
@@ -145,18 +166,24 @@ void process_serial(void)
         return;
     }
 
-    if (serial_rx[0] == cmd_Local_Escape) {
-        if (!validFourWayFrame()) {
-            resetSerialParser();
-            return;
-        }
+if (serial_rx[0] == cmd_Local_Escape) {
 
-        /*
-         * Chỉ frame 4-Way hợp lệ mới được chọn APP.
-         * stopWebRadio() chạy trước Check_4Way().
-         */
-        serial_tx_counter =
-            Check_4Way(serial_rx);
+    if (!validFourWayFrame()) {
+        resetSerialParser();
+        return;
+    }
+
+    // =============================================
+    // Frame USB hợp lệ đầu tiên -> khóa USB
+    // và tắt Wi-Fi trước khi đụng GPIO21 / ESC.
+    // =============================================
+    if (!lockUsbMode()) {
+        resetSerialParser();
+        return;
+    }
+
+    serial_tx_counter =
+        Check_4Way(serial_rx);
 
         for (uint16_t b = 0;
              b < serial_tx_counter;
@@ -169,24 +196,27 @@ void process_serial(void)
         return;
     }
 
-    if (serial_rx[0] == 0x24 &&
-        serial_rx[1] == 0x4D &&
-        serial_rx[2] == 0x3C) {
+if (serial_rx[0] == 0x24 &&
+    serial_rx[1] == 0x4D &&
+    serial_rx[2] == 0x3C) {
 
-        if (!validMspFrame()) {
-            resetSerialParser();
-            return;
-        }
+    if (!validMspFrame()) {
+        resetSerialParser();
+        return;
+    }
 
-        /*
-         * Một frame MSP hoàn chỉnh và đúng checksum chọn APP.
-         * Wi-Fi tắt trước khi App bắt đầu phiên 4-Way.
-         */
-        serial_tx_counter =
-            MSP_Check(
-                serial_rx,
-                static_cast<uint8_t>(
-                    serial_rx_counter));
+    // MSP hợp lệ đầu tiên của ConfigTool
+    // cũng khóa USB và tắt Wi-Fi.
+    if (!lockUsbMode()) {
+        resetSerialParser();
+        return;
+    }
+
+    serial_tx_counter =
+        MSP_Check(
+            serial_rx,
+            static_cast<uint8_t>(
+                serial_rx_counter));
 
         for (uint16_t b = 0;
              b < serial_tx_counter;

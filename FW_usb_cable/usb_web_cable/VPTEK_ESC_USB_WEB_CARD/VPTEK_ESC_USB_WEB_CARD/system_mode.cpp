@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #include "system_mode.h"
+#include "web_bridge.h"
 
 SystemMode systemMode = MODE_WAIT;
 
@@ -8,12 +9,13 @@ bool selectAppMode()
 {
     // Wi-Fi đã giữ quyền thì không cho USB chen vào.
     if (systemMode == MODE_WEB) {
-        return true;
+        return false;
     }
 
     // USB gửi frame hợp lệ đầu tiên: chọn USB và tắt Wi-Fi.
     if (systemMode != MODE_APP) {
-        systemMode = MODE_SHARED;
+        systemMode = MODE_APP;
+        stopWebRadio();
     }
 
     return true;
@@ -37,7 +39,7 @@ bool isWaitMode()
 
 bool isAppMode()
 {
-    return false;
+    return systemMode == MODE_APP;
 }
 
 bool isWebMode()
@@ -47,5 +49,9 @@ bool isWebMode()
 
 const char *systemModeName()
 {
-    return "USB / Wi-Fi";
+    switch (systemMode) {
+        case MODE_APP:  return "USB / CARD";
+        case MODE_WEB:  return "WEB / CARD";
+        default:        return "READY";
+    }
 }
