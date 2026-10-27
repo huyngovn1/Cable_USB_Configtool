@@ -1,4 +1,4 @@
-VPTEK CARD FIRMWARE MENU UPDATE
+
 
 Replace these three files together:
 - DisplayUI.cpp
