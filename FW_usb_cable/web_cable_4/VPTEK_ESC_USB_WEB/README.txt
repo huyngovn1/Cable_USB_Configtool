@@ -1,4 +1,4 @@
-VPTEK ESC USB + WEB
+ESC USB + WEB
 
 This project has two interfaces only:
 - USB: compatible with the AM32 Config Tool through the ESP32-C3 USB COM port.
